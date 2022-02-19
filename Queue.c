@@ -9,8 +9,9 @@ int Q_Ctor (queue* que)
     que->capacity = CAPACITY_0;
     que->size     = 0;
     que->head     = 0;
-    que->tail     = CAPACITY_0 - 1;
+    que->tail     = 0;
     que->ctored   = 1;
+
     que_num++;
 
     if (que_num == 1)
@@ -46,16 +47,20 @@ int Q_Resize (queue* que, int mode)
         que->capacity *= 2;
         if (que->head >= que->tail)
         {
-            que->data = (data_t*) realloc (que->data, que->size * sizeof (data_t));
+            que->data = (data_t*) realloc (que->data, que->capacity * sizeof (data_t));
+            for (size_t i = que->capacity/2; i < que->capacity; i++)
+            {
+                que->data[i] = 0;
+            }
             return NO_ERR;
         }
         else
         {
             data_t* tmp_data = (data_t*) calloc (que->capacity, sizeof (data_t));
 
-            memcpy (tmp_data, que->data, que->head * sizeof (data_t));
+            memcpy (tmp_data, que->data, (que->head + 1)  * sizeof (data_t));
 
-            memcpy (tmp_data + TAIL + que->capacity/2, que->data + TAIL, (que->size - TAIL) * sizeof (data_t));
+            memcpy (tmp_data + que->tail + que->capacity/2, que->data + que->tail, (que->size - que->head - 1) * sizeof (data_t));
 
             free (que->data);
 
@@ -73,24 +78,24 @@ int Q_Resize (queue* que, int mode)
         {
             data_t* tmp_data = (data_t*) calloc (que->capacity, sizeof (data_t));
 
-            memcpy (tmp_data, que->data + TAIL, que->size * sizeof (data_t));
+            memcpy (tmp_data, que->data + que->tail, que->size * sizeof (data_t));
 
             free (que->data);
 
             que->data = tmp_data;
 
             que->head -= que->tail;
-            que->tail   = 0;
+            que->tail  = 0;
 
             return NO_ERR;
         }
         else
         {
-            memcpy (que->data + TAIL - que->capacity + 1, que->data + TAIL, (2*que->capacity - TAIL)*sizeof (data_t));
+            memcpy (que->data + que->tail - que->capacity, que->data + que->tail, (2*que->capacity - que->tail)*sizeof (data_t));
 
             que->tail -= que->capacity;
 
-            que->data = (data_t*) realloc (que->data, que->capacity);
+            que->data = (data_t*) realloc (que->data, que->capacity * sizeof (data_t));
 
             return NO_ERR;
         }
@@ -103,9 +108,14 @@ int Q_Push_Front (queue* que, double push)
     {
         Q_Resize (que, UP);
     }
-    que->size++;
+
+    if (que->size != 0)
+    {
+        que->head = (que->head + 1)%que->capacity;
+    }
+
     que->data[que->head] = push;
-    que->head = (que->head + 1)%que->capacity;
+    que->size++;
 
     return NO_ERR;
 }
@@ -116,9 +126,13 @@ int Q_Push_Back (queue* que, double push)
     {
         Q_Resize (que, UP);
     }
-    que->size++;
+
+    if (que->size != 0)
+    {
+        que->tail = (que->tail + que->capacity - 1)%que->capacity;
+    }
     que->data[que->tail] = push;
-    que->tail = (que->tail + que->capacity - 1)%que->capacity;
+    que->size++;
 
     return NO_ERR;
 }
@@ -129,10 +143,15 @@ double Q_Pop_Front (queue* que)
     {
         Q_Resize (que, DOWN);
     }
+
+    if (que->size == 0)
+    {
+        fprintf (logfile, "Queue underflow\n");
+    }
     que->size--;
-    que->head = (que->head + que->capacity - 1)%que->capacity;
     double pop = que->data[que->head];
-    que->data[que->head] = 0;;
+    que->data[que->head] = 0;
+    que->head = (que->head + que->capacity - 1)%que->capacity;
     return pop;
 }
 
@@ -142,10 +161,15 @@ double Q_Pop_Back (queue* que)
     {
         Q_Resize (que, DOWN);
     }
+
+    if (que->size == 0)
+    {
+        fprintf (logfile, "Queue underflow\n");
+    }
     que->size--;
-    que->tail = (que->tail + 1)%que->capacity;
     double pop = que->data[que->tail];
-    que->data[que->tail] = 0; 
+    que->data[que->tail] = 0;
+    que->tail = (que->tail + 1)%que->capacity; 
     return pop;
 }
 
@@ -167,19 +191,19 @@ int Q_Dump (queue* que)
 
     for (size_t i = 0; i < que->capacity; i++)
     {
-        if ((i < HEAD && i > TAIL && HEAD >= TAIL) || ((i > TAIL || i < HEAD) && HEAD < TAIL))
+        if ((i < que->head && i > que->tail && que->head >= que->tail) || ((i > que->tail || i < que->head) && que->head < que->tail))
         {
             fprintf (logfile, "\t\t*[%3zd] = %lf\n", i, que->data[i]);
         }
-        else if (i == HEAD && i == TAIL)
+        else if (i == que->head && i == que->tail)
         {
             fprintf (logfile, "\t\t>[%3zd] = %lf<head/tail pop\n", i, que->data[i]);
         }
-        else if (i == HEAD)
+        else if (i == que->head)
         {
             fprintf (logfile, "\t\t>[%3zd] = %lf<head pop\n", i, que->data[i]);
         }
-        else if (i == TAIL)
+        else if (i == que->tail)
         {
             fprintf (logfile, "\t\t>[%3zd] = %lf<tail pop\n", i, que->data[i]);
         }

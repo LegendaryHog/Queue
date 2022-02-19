@@ -7,13 +7,6 @@
 
 #define CAPACITY_0 8
 #define NULL_PTR_EXIT if (que == NULL){return ERR;}
-#define TAIL ((que->tail + 1) % que->capacity)
-#define HEAD ((que->head + que->capacity - 1)%que->capacity)
-
-//FORNT - index of elem now, which will poped if you call Q_Pop_Front ()
-//BACK  - index of elem nim, which will poped if you call Q_Pop_Back  ()
-
-
 
 typedef double data_t;
 
@@ -29,7 +22,7 @@ typedef struct
 queue;
 
 enum ERRORS{
-    ERR = 0,
+    ERR    = 0,
     NO_ERR = 1,
 };
 

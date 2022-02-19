@@ -8,13 +8,9 @@ int main (void)
     Q_Dump (que);
     for (int i = 0; i < 100; i++)
     {
-        Q_Push_Front (que, 10);
+        Q_Push_Front (que, 10 + (double)i);
+        Q_Dump (que);
     }
-
-
-    Q_Dump (que);
-
-    Q_Push_Front (que, 10);
 
     Q_Dump (que);
 
@@ -22,7 +18,7 @@ int main (void)
 
     Q_Dump (que);
 
-    /*for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 50; i++)
     {
         Q_Pop_Back (que);
     }
@@ -30,9 +26,9 @@ int main (void)
     for (int i = 0; i < 50; i++)
     {
         Q_Push_Front (que, 20);
-    }*/
+    }
 
-    //Q_Dump (que);
+    Q_Dump (que);
 
     Q_Dtor (que);
     free (que);
