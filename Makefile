@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 
-all: comp run clear
+all: comp valgrind_gir run clear
 
 comp:
 	$(CC) Queue.c main.c $(CFLAGS) -o que.out
