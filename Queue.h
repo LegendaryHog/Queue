@@ -13,6 +13,7 @@
 //FORNT - index of elem now, which will poped if you call Q_Pop_Front ()
 //BACK  - index of elem nim, which will poped if you call Q_Pop_Back  ()
 
+
 typedef double data_t;
 
 typedef struct
